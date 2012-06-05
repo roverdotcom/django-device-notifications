@@ -67,6 +67,7 @@ def send_notification(request):
 
 ```
 
+That's it.
 
 ## License
 

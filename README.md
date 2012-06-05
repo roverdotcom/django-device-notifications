@@ -24,10 +24,15 @@ INSTALLED_APPS = (
 APN_PORT = 2195
 APN_HOST = 'gateway.push.apple.com'
 APN_PASSPHRASE = 'myapncertpassphrase'
-APN_DEFAULT_APP_ID = '<< the name of your iOS app >>'
+APN_DEFAULT_APP_ID = 'ios-app'
 APN_CERT_PATH_TEMPLATE =os.path.join(BASE_PATH, 'certs',
     'ios', 'production', '%s.pem')
 ```
+
+Store your `cert` and `key` file into the following path:
+
+* certs/ios/production/ios-app-cert.pem
+* certs/ios/production/ios-app-key.pem
 
 To ensure your settings is setup correctly, runs these tests:
 

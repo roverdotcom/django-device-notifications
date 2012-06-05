@@ -3,7 +3,7 @@ django-push-notification
 
 ## Before You Start
 
-Read the following tutorial carefully. You should have both two `pem` files ready, one for the cert and one for the key.
+Read the following tutorial carefully. You should have both `pem` files ready, one for the cert and one for the key.
 
     http://www.raywenderlich.com/3443/apple-push-notification-services-tutorial-part-12
 
@@ -13,7 +13,7 @@ Read the following tutorial carefully. You should have both two `pem` files read
 2. celery
 
 ## Usage
-First, you need to add these constants to your settings.py. Here some examples:
+First, you need to add these constants to your `settings.py`. For example,
 
 ```python
 INSTALLED_APPS = (

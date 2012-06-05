@@ -42,7 +42,7 @@ python manage.py jtest push_notifications
 
 If all tests pass, you are good to go.
 
-Then, you will need to associate a idevice token with your user. For example,
+Then, you will need to associate an apn `device token` with a user. For example,
 
 ```python
 # views.py
@@ -50,7 +50,7 @@ Then, you will need to associate a idevice token with your user. For example,
 @require_POST
 def add_idevice(request):
   # ...
-  idevice = IDevice(user=recipient, token=token, app_id=APN_DEFAULT_APP_ID)
+  idevice = IDevice(user=recipient, token=token, app_id=settings.APN_DEFAULT_APP_ID)
   idevice.save()
 ```
 

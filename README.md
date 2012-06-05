@@ -37,7 +37,7 @@ python manage.py jtest push_notifications
 
 If all tests pass, you are good to go.
 
-Then, you will need to associate a idevice token with your user:
+Then, you will need to associate a idevice token with your user. For example,
 
 ```python
 # views.py
@@ -49,7 +49,7 @@ def add_idevice(request):
   idevice.save()
 ```
 
-And, you can 
+And, you can send push notification to a specific user as the recipient. For example,
 
 ```python
 from push_notifications.tasks import IDEVICE_NOTIFICATION_TEMPLATE
@@ -58,7 +58,7 @@ from push_notifications.models import IDevice
 def send_notification(request):
   message = copy.deepcopy(IDEVICE_NOTIFICATION_TEMPLATE)
   message['aps']['alert']['body'] = 'Hello iPhone User'
-  IDevice.objects.notify_ios_app(message, person=recipient)
+  IDevice.objects.notify_ios_app(message, user=recipient)
 
 ```
 

@@ -1,9 +1,10 @@
 django-push-notification
 ========================
 
+## Usage
 
+## License
 
-== License
 
 ```
 Copyright (c) 2012, Rover.com

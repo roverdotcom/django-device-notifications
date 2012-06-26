@@ -7,8 +7,10 @@ from socket import socket
 
 from celery.task import task
 
-from settings import APN_PORT, APN_HOST, APN_PASSPHRASE, APN_CERT_PATH_TEMPLATE
-
+from settings import APN_PORT, APN_HOST
+from settings import APN_PASSPHRASE, APN_CERT_PATH_TEMPLATE
+from settings import APN_DEV_PORT, APN_DEV_HOST
+from settings import APN_DEV_PASSPHRASE, APN_DEV_CERT_PATH_TEMPLATE
 
 APN_MSG_SIZE_LIMIT = 256
 
@@ -53,15 +55,15 @@ def pack_message(msg, device_token, allow_truncate=True):
                       binascii.unhexlify(device_token), len(payload), payload)
     return mail
 
-def create_apn_connection(key_path, cert_path, passphrase):
+def create_apn_connection(host, port, key_path, cert_path, passphrase):
     ctx = SSL.Context(SSL.SSLv23_METHOD)
     if passphrase is not None and len(passphrase) > 0:
-        ctx.set_passwd_cb(lambda *unused: APN_PASSPHRASE)
+        ctx.set_passwd_cb(lambda *unused: passphrase)
     ctx.use_privatekey_file(key_path)
     ctx.use_certificate_file(cert_path)
 
     c = SSL.Connection(ctx, socket())
-    c.connect((APN_HOST, APN_PORT))
+    c.connect((host, port))
     c.setblocking(1)
 
     return c
@@ -70,18 +72,28 @@ def send_message(c, packet):
     c.send(packet)
 
 @task
-def notify_idevices(msg, devices, app_id):
-    cert_path = APN_CERT_PATH_TEMPLATE % (app_id + '-cert')
-    key_path = APN_CERT_PATH_TEMPLATE % (app_id + '-key')
-    passphrase = APN_PASSPHRASE
+def notify_idevices(msg, devices, app_id, development=False):
+    if not development:
+        cert_path = APN_CERT_PATH_TEMPLATE % (app_id + '-cert')
+        key_path = APN_CERT_PATH_TEMPLATE % (app_id + '-key')
+        apn_host = APN_HOST
+        apn_port = APN_PORT
+        passphrase = APN_PASSPHRASE
+    else:
+        cert_path = APN_DEV_CERT_PATH_TEMPLATE % (app_id + '-cert')
+        key_path = APN_DEV_CERT_PATH_TEMPLATE % (app_id + '-key')
+        apn_host = APN_DEV_HOST
+        apn_port = APN_DEV_PORT
+        passphrase = APN_DEV_PASSPHRASE
 
-    c = create_apn_connection(key_path, cert_path, passphrase)
-    try:
-        for i in range(len(devices)):
-            device = devices[i]
-            mail = pack_message(msg, device)
-            send_message(c, mail)
-    finally:
-        if c is not None:
-            c.close()
-
+    if len(devices) > 0:
+        c = create_apn_connection(
+                apn_host, apn_port, 
+                key_path, cert_path, passphrase)
+        try:
+            for i in range(len(devices)):
+                mail = pack_message(msg, devices[i])
+                send_message(c, mail)
+        finally:
+            if c is not None:
+                c.close()

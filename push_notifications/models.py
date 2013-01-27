@@ -7,11 +7,6 @@ from .managers import IDeviceManager
 from .api import apn as apn_api
 from .api import gcm as gcm_api
 
-APP_ID_CHOICES = (
-    ('com.rover.Rover-com', 'com.rover.Rover-com'),
-)
-
-
 
 class DeviceBase(models.Model):
     objects = DeviceManager()

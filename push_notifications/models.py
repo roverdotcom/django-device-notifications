@@ -8,6 +8,14 @@ from .api import apn as apn_api
 from .api import gcm as gcm_api
 
 
+class InvalidDeviceTypeException(Exception):
+    """
+    Exception raised when a device_type other
+    than those supported is specified.
+    """
+    pass
+
+
 class DeviceBase(models.Model):
     objects = DeviceManager()
 

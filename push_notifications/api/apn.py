@@ -13,13 +13,35 @@ IDEVICE_NOTIFICATION_TEMPLATE = {
     'aps': {
         'alert': {
                 'action-loc-key': 'Open',
-                'body': 'You have received a message'
+                'body': 'You have received a message' # TODO: make this generalized / editable
             }, 'badge': 1
         }
     }
 
+
 def send_message(device, message):
+    """
+    Send an iOS/APN message.
+
+    This will:
+
+    1. (Optionally) Cross the Celery barrier
+    2. Call _send_message
+    """
+    if settings.DEVICE_NOTIFICATION_USE_CELERY:
+        send_apn_message.delay(device, message)
+    else:
+        _send_message(device, message)
+
+
+def _send_message(device, message):
+    """
+    Do the actual work APN work.
+
+    This allows us to cross the celery boundary as needed.
+    """
     pass
+
 
 def _create_apn_connection(host, port, key_path, cert_path, passphrase):
     ctx = SSL.Context(SSL.SSLv23_METHOD)
@@ -56,6 +78,7 @@ def _pack_message(msg, device_token, allow_truncate=True):
                       binascii.unhexlify(device_token), len(payload), payload)
     return mail
 
+
 def _truncate_string(body, oversize):
     body_len = len(body)
     new_body_len = body_len - oversize - 4
@@ -67,7 +90,8 @@ def _truncate_string(body, oversize):
 
     return body
 
-def _notify_idevices(msg, devices, app_id, development=False):
+
+def _notify_idevices(msg, devices, development=False):
     for attr in ('APN_KEY', 'APN_CERTIFICATE', 'APN_PASSPHRASE'):
         if getattr(settings, attr) is None:
             raise ImproperlyConfigured(

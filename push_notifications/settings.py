@@ -26,3 +26,12 @@ APN_PASSPHRASE = getattr(
     settings,
     'APN_PASSPHRASE',
     None)
+
+# By default, do not use celery.
+# If you would like to use celery, mark this as True.
+# To learn more about celery, visit this documentation here:
+# http://docs.celeryproject.org/en/latest/index.html
+DEVICE_NOTIFICATIONS_USE_CELERY = getattr(
+    settings,
+    'DEVICE_NOTIFICATIONS_USE_CELERY',
+    False)

@@ -1,11 +1,12 @@
-import json
-import struct
-import binascii
-import copy
+import json, struct, binascii, copy
+
 from OpenSSL import SSL
 from socket import socket
 
-import ..settings as settings
+from django.core.exceptions import ImproperlyConfigured
+
+from push_notifications import settings
+
 
 APN_MSG_SIZE_LIMIT = 256
 
@@ -69,7 +70,7 @@ def _pack_message(msg, device_token, allow_truncate=True):
         # truncate body to fit the limit, if possible
         clone = copy.deepcopy(msg)
         clone['aps']['alert']['body'] = \
-                truncate_string(msg['aps']['alert']['body'], oversize)
+                _truncate_string(msg['aps']['alert']['body'], oversize)
         payload = json.dumps(clone)
 
     header = "!cH32sH%ds" % len(payload)

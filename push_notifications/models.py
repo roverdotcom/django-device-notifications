@@ -1,8 +1,9 @@
 from django.db import models
+from django.contrib.auth.models import User
 
-from people.models import Person
+from django.utils import timezone
+
 from .managers import DeviceManager
-from .managers import IDeviceManager
 
 from .api import apn as apn_api
 from .api import gcm as gcm_api
@@ -60,9 +61,8 @@ class DeviceBase(models.Model):
 
 
 class IDevice(models.Model):
-    objects = IDeviceManager()
 
-    person = models.ForeignKey(Person, related_name='idevices')
+    user = models.ForeignKey(User, related_name='idevices')
     development = models.BooleanField(default=False, null=False)
 
     token = models.CharField(max_length=64,

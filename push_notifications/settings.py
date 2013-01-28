@@ -27,6 +27,10 @@ APN_PASSPHRASE = getattr(
     'APN_PASSPHRASE',
     None)
 
+APN_DEFAULT_APP_ID = 'iosapp'
+
+APN_CERT_PATH_TEMPLATE = 'certs/ios/%s'
+
 # By default, do not use celery.
 # If you would like to use celery, mark this as True.
 # To learn more about celery, visit this documentation here:

@@ -5,7 +5,7 @@ from socket import socket
 
 from django.core.exceptions import ImproperlyConfigured
 
-from push_notifications import settings
+from device_notifications import settings
 
 
 APN_MSG_SIZE_LIMIT = 256

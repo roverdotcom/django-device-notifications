@@ -22,14 +22,10 @@ IDEVICE_NOTIFICATION_TEMPLATE = {
 
 
 def send_message(device, message):
-    if settings.DEVICE_NOTIFICATION_USE_CELERY:
-        raise 'Not Implemented'
-    else:
-        _notify_idevices(message, [device.token], development=device.development)
+    _notify_idevices(message, [device.token], development=device.development)
 
 
 def _create_apn_connection(host, port, key_path, cert_path, passphrase):
-
     ctx = SSL.Context(SSL.SSLv23_METHOD)
     if passphrase is not None and len(passphrase) > 0:
         ctx.set_passwd_cb(lambda *unused: passphrase)

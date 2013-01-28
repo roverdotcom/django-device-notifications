@@ -1,4 +1,7 @@
 class FallbackTask(object):
+    def __init__(*args, **kwargs):
+        pass
+
     def __call__(self, *args, **kwargs):
         pass
 

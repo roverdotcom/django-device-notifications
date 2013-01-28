@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 
 from .managers import DeviceManager
+from task import task
 
 from .spi import apn as apn_api
 from .spi import gcm as gcm_api
@@ -51,6 +52,7 @@ class DeviceBase(models.Model):
     class Meta:
         abstract = True
 
+    @task
     def send_message(self, message):
         if self.device_type == self.DEVICE_TYPE_IOS:
             return apn_api.send_message(message)

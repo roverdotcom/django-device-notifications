@@ -5,11 +5,12 @@ from django.contrib.auth.models import User
 from django.test.testcases import TestCase
 
 from models import DeviceManager, IDevice
-from settings import APN_PORT, APN_HOST, APN_CERTIFICATE, APN_KEY, APN_PASSPHRASE
-from settings import APN_DEFAULT_APP_ID, APN_CERT_PATH_TEMPLATE
+from settings import APN_PORT, APN_HOST, APN_PASSPHRASE
+from settings import APN_DEFAULT_APP_ID, APN_CERTIFICATE_PATH_TEMPLATE
 
 from spi.apn import IDEVICE_NOTIFICATION_TEMPLATE
-from spi.apn import _create_apn_connection, _pack_message, _notify_idevices, _truncate_string
+from spi.apn import _create_apn_connection, _pack_message, _notify_idevices
+from spi.apn import _truncate_string, _concat_path
 
 SAMPLE_DEVICE_TOKEN = \
         '740faaaaaaaaf74f9b7c25d48e3358945f6aa01da5ddb387462c7eaf61bb78ad'
@@ -31,29 +32,30 @@ class SendMessageTest(TestCase):
             release to open-source
         """
         user = User(username='gooduser', first_name='Good', last_name='User')
+        user.save()
 
         prod_device = IDevice(user=user, token=SAMPLE_DEVICE_TOKEN)
         prod_device.save()
         
-        dev_device = IDevice(person=person, token=SAMPLE_DEVICE_TOKEN_1, 
+        dev_device = IDevice(user=user, token=SAMPLE_DEVICE_TOKEN_1, 
                 app_id=APN_DEFAULT_APP_ID, development=True)
         dev_device.save()
         
-        IDevice.objects.notify_ios_app('Hello World', 
-                app_id=APN_DEFAULT_APP_ID, person=person)
+        IDevice.objects.filter(user=user).send_message('Hello World', 
+                app_id=APN_DEFAULT_APP_ID)
 
     def test_settings(self):
         # This test is here to assert env is setup properly
-        self.assertIsNotNone(APN_PORT)
-        self.assertIsNotNone(APN_HOST)
-        self.assertIsNotNone(APN_PASSPHRASE)
-        self.assertIsNotNone(APN_CERT_PATH_TEMPLATE)
-        
+        self.assertIsNotNone(APN_PORT, 'Cannot find value from `settings` file.')
+        self.assertIsNotNone(APN_HOST, 'Cannot find value from `settings` file.')
+        self.assertIsNotNone(APN_PASSPHRASE, 'Cannot find value from `settings` file.')
+        self.assertIsNotNone(APN_CERTIFICATE_PATH_TEMPLATE, 'Cannot find value from `settings` file.')
+
         app_id = APN_DEFAULT_APP_ID
         self.assertIsNotNone(app_id)
   
-        cert_path = APN_CERT_PATH_TEMPLATE % (app_id + '-cert')
-        key_path = APN_CERT_PATH_TEMPLATE % (app_id + '-key')
+        key_path = _concat_path(key=True, development=False)
+        cert_path = _concat_path(key=False, development=False)
 
         self.assertTrue(os.path.exists(cert_path))
         self.assertTrue(os.path.exists(key_path))
@@ -82,12 +84,14 @@ class SendMessageTest(TestCase):
         self.assertTrue(hex_string.index(SAMPLE_DEVICE_TOKEN) > 0, 'Expect device token.')
 
     def test_create_connect_to_apn(self):
+        self.test_settings()
+
         apn_host = APN_HOST
         apn_port = APN_PORT
-        app_id = APN_DEFAULT_APP_ID
-        cert_path = APN_CERT_PATH_TEMPLATE % (app_id + '-cert')
-        key_path = APN_CERT_PATH_TEMPLATE % (app_id + '-key')
         passphrase = APN_PASSPHRASE
+
+        key_path = _concat_path(key=True, development=False)
+        cert_path = _concat_path(key=False, development=False)
 
         c = _create_apn_connection(apn_host, apn_port, key_path, 
                                   cert_path, passphrase)
@@ -95,6 +99,8 @@ class SendMessageTest(TestCase):
         c.send(data)
 
     def test_send_notification(self):
+        self.test_settings()
+
         app_id = APN_DEFAULT_APP_ID
 
         _notify_idevices(IDEVICE_NOTIFICATION_TEMPLATE, 

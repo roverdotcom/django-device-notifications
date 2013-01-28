@@ -1,4 +1,5 @@
 import json, struct, binascii, copy
+from os import path
 
 from OpenSSL import SSL
 from socket import socket
@@ -21,33 +22,26 @@ IDEVICE_NOTIFICATION_TEMPLATE = {
 
 
 def send_message(device, message):
-    """
-    Send an iOS/APN message.
-
-    This will:
-
-    1. (Optionally) Cross the Celery barrier
-    2. Call _send_message
-    """
     if settings.DEVICE_NOTIFICATION_USE_CELERY:
-        send_apn_message.delay(device, message)
+        raise 'Not Implemented'
     else:
-        _send_message(device, message)
-
-
-def _send_message(device, message):
-    """
-    Do the actual work APN work.
-
-    This allows us to cross the celery boundary as needed.
-    """
-    pass
+        _notify_idevices(message, [device.token], development=device.development)
 
 
 def _create_apn_connection(host, port, key_path, cert_path, passphrase):
+
     ctx = SSL.Context(SSL.SSLv23_METHOD)
     if passphrase is not None and len(passphrase) > 0:
         ctx.set_passwd_cb(lambda *unused: passphrase)
+    
+    if not path.isfile(key_path):
+        msg = 'The key file "%s" is not valid.' % key_path
+        raise ValueError(msg)
+
+    if not path.isfile(cert_path):
+        msg = 'The cert file "%s" is not valid.' % cert_path
+        raise ValueError(msg)
+        
     ctx.use_privatekey_file(key_path)
     ctx.use_certificate_file(cert_path)
 
@@ -91,24 +85,41 @@ def _truncate_string(body, oversize):
 
     return body
 
+def _concat_path(app_id=settings.APN_DEFAULT_APP_ID, key=False, development=False):    
+    if key:
+        file_suffix = settings.APN_KEY_FILE_SUFFIX
+    else:
+        file_suffix = settings.APN_CERT_FILE_SUFFIX
 
-def _notify_idevices(msg, devices, development=False):
-    for attr in ('APN_KEY', 'APN_CERTIFICATE', 'APN_PASSPHRASE'):
-        if getattr(settings, attr) is None:
-            raise ImproperlyConfigured(
-                'You must define %s in your settings file.' % (
-                    attr,))
+    if development:
+        path_prefix = settings.APN_DEVELOPMENT_PATH_PREFIX
+    else:
+        path_prefix = settings.APN_PATH_PREFIX
+
+    path = settings.APN_CERTIFICATE_PATH_TEMPLATE.format(
+            path_prefix=path_prefix,app_id=app_id, file_suffix=file_suffix)
+    
+    return path
+
+def _notify_idevices(msg, devices, app_id=settings.APN_DEFAULT_APP_ID, development=False):
+    if getattr(settings, 'APN_PASSPHRASE') is None:
+        raise ImproperlyConfigured(
+            'Expect "%s" in your settings file.' % ('APN_PASSPHRASE'))
+
+    key_path = _concat_path(key=True, development=development)
+    cert_path = _concat_path(key=False, development=development)
+    host = settings.APN_HOST
 
     if len(devices) > 0:
-        conn = create_apn_connection(
-                settings.APN_HOST,
+        conn = _create_apn_connection(
+                host,
                 settings.APN_PORT,
-                settings.APN_KEY,
-                settings.APN_CERTIFICATE,
+                key_path,
+                cert_path,
                 settings.APN_PASSPHRASE)
         try:
             for i in range(len(devices)):
-                mail = pack_message(msg, devices[i])
+                mail = _pack_message(msg, devices[i])
                 conn.send(mail)
         finally:
             if conn is not None:

@@ -4,7 +4,6 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 
 from .managers import DeviceManager
-from task import task
 
 from .spi import apn as apn_api
 from .spi import gcm as gcm_api
@@ -21,26 +20,18 @@ class InvalidDeviceTypeException(Exception):
 class DeviceBase(models.Model):
     objects = DeviceManager()
 
-    is_development = models.BooleanField(default=False)
-
     DEVICE_TYPE_IOS = 'ios'
     DEVICE_TYPE_ANDROID = 'android'
     DEVICE_TYPE_CHOICES = (
         (DEVICE_TYPE_ANDROID, 'Android'),
         (DEVICE_TYPE_IOS, 'iOS')
     )
+
     device_type = models.CharField(
         max_length=10,
         choices=DEVICE_TYPE_CHOICES)
 
-    device_id = models.CharField(
-        max_length=64,
-        blank=False,
-        unique=True)
-    registration_id = models.TextField(
-        blank=True,
-        unique=True)
-
+    user = models.ForeignKey(User)
     added_at = models.DateTimeField(default=timezone.now)
     modified_at = models.DateTimeField(auto_now=True)
 
@@ -52,20 +43,28 @@ class DeviceBase(models.Model):
     class Meta:
         abstract = True
 
-    @task
-    def send_message(self, message):
+    def send_message(self, message, app_id=None):
         if self.device_type == self.DEVICE_TYPE_IOS:
-            return apn_api.send_message(message)
+            return apn_api.send_message(self, message, app_id)
         elif self.device_type == self.DEVICE_TYPE_ANDROID:
-            return gcm_api.send_message(message)
+            return gcm_api.send_message(self, message)
         else:
             raise InvalidDeviceTypeException()
 
+class AndroidDevice(DeviceBase):
+    device_id = models.CharField(
+        max_length=64,
+        blank=False,
+        unique=True)
 
-class IDevice(models.Model):
+    registration_id = models.TextField(
+        blank=True,
+        unique=True)
 
-    user = models.ForeignKey(User, related_name='idevices')
+class IDevice(DeviceBase):
     development = models.BooleanField(default=False, null=False)
 
-    token = models.CharField(max_length=64,
-            default='',null=False, blank=False, unique=True)
+    app_id = models.CharField(max_length=16, default=None, null=True)
+
+    token = models.CharField(max_length=64, default='', null=False,
+                             blank=False, unique=True)

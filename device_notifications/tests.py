@@ -7,8 +7,8 @@ from django.test.testcases import TestCase
 from models import DeviceManager, IDevice
 from settings import APN_PORT, APN_HOST, APN_PASSPHRASE
 from settings import APN_DEFAULT_APP_ID, APN_CERTIFICATE_PATH_TEMPLATE
+from settings import IDEVICE_NOTIFICATION_TEMPLATE
 
-from spi.apn import IDEVICE_NOTIFICATION_TEMPLATE
 from spi.apn import _create_apn_connection, _pack_message, _notify_idevices
 from spi.apn import _truncate_string, _concat_path
 

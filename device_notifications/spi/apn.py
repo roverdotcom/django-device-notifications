@@ -8,18 +8,9 @@ from django.core.exceptions import ImproperlyConfigured
 
 from device_notifications import settings
 
+from device_notifications.settings import IDEVICE_NOTIFICATION_TEMPLATE
 
 APN_MSG_SIZE_LIMIT = 256
-
-IDEVICE_NOTIFICATION_TEMPLATE = {
-    'aps': {
-        'alert': {
-                'action-loc-key': 'Open',
-                'body': 'You have received a message' # TODO: make this generalized / editable
-            }, 'badge': 1
-        }
-    }
-
 
 def send_message(device, message):
     _notify_idevices(message, [device.token], development=device.development)

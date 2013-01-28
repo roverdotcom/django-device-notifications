@@ -37,6 +37,15 @@ APN_KEY_FILE_SUFFIX = getattr(
 APN_CERT_FILE_SUFFIX = getattr(
         settings, 'APN_CERT_FILE_SUFFIX', '-cert.pem')
 
+IDEVICE_NOTIFICATION_TEMPLATE = {
+    'aps': {
+        'alert': {
+                'action-loc-key': 'Open',
+                'body': 'You have received a message' # TODO: make this generalized / editable
+            }, 'badge': 1
+        }
+    }
+
 # By default, do not use celery.
 # If you would like to use celery, mark this as True.
 # To learn more about celery, visit this documentation here:

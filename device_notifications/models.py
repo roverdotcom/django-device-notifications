@@ -5,8 +5,8 @@ from django.utils import timezone
 
 from .managers import DeviceManager
 
-from .api import apn as apn_api
-from .api import gcm as gcm_api
+from .spi import apn as apn_api
+from .spi import gcm as gcm_api
 
 
 class InvalidDeviceTypeException(Exception):

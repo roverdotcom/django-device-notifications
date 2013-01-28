@@ -8,8 +8,8 @@ from models import DeviceManager, IDevice
 from settings import APN_PORT, APN_HOST, APN_CERTIFICATE, APN_KEY, APN_PASSPHRASE
 from settings import APN_DEFAULT_APP_ID, APN_CERT_PATH_TEMPLATE
 
-from api.apn import IDEVICE_NOTIFICATION_TEMPLATE
-from api.apn import _create_apn_connection, _pack_message, _notify_idevices, _truncate_string
+from spi.apn import IDEVICE_NOTIFICATION_TEMPLATE
+from spi.apn import _create_apn_connection, _pack_message, _notify_idevices, _truncate_string
 
 SAMPLE_DEVICE_TOKEN = \
         '740faaaaaaaaf74f9b7c25d48e3358945f6aa01da5ddb387462c7eaf61bb78ad'

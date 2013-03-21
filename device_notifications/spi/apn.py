@@ -1,34 +1,44 @@
-import json, struct, binascii, copy
-from os import path
+import json
+import struct
+import binascii
+import copy
+import os
 
 from OpenSSL import SSL
 from socket import socket
 
 from django.core.exceptions import ImproperlyConfigured
 
-from device_notifications import settings
 
-from device_notifications.settings import IDEVICE_NOTIFICATION_TEMPLATE
+import .settings as settings
+from .models as AbstractBaseDevice
+
 
 APN_MSG_SIZE_LIMIT = 256
 
-def send_message(device, message):
-    _notify_idevices(message, [device.token], development=device.development)
+
+def send_message(devices, message):
+    if isinstance(devices, AbstractBaseDevice):
+        devices = [devices]
+    _notify_idevices(
+        message,
+        [device.token for device in devices],
+        development=devices[0].development)
 
 
 def _create_apn_connection(host, port, key_path, cert_path, passphrase):
     ctx = SSL.Context(SSL.SSLv23_METHOD)
     if passphrase is not None and len(passphrase) > 0:
         ctx.set_passwd_cb(lambda *unused: passphrase)
-    
-    if not path.isfile(key_path):
+
+    if not os.path.isfile(key_path):
         msg = 'The key file "%s" is not valid.' % key_path
         raise ValueError(msg)
 
-    if not path.isfile(cert_path):
+    if not os.path.isfile(cert_path):
         msg = 'The cert file "%s" is not valid.' % cert_path
         raise ValueError(msg)
-        
+
     ctx.use_privatekey_file(key_path)
     ctx.use_certificate_file(cert_path)
 
@@ -50,8 +60,9 @@ def _pack_message(msg, device_token, allow_truncate=True):
 
         # truncate body to fit the limit, if possible
         clone = copy.deepcopy(msg)
-        clone['aps']['alert']['body'] = \
-                _truncate_string(msg['aps']['alert']['body'], oversize)
+        clone['aps']['alert']['body'] = _truncate_string(
+            msg['aps']['alert']['body'],
+            oversize)
         payload = json.dumps(clone)
 
     header = "!cH32sH%ds" % len(payload)
@@ -72,7 +83,11 @@ def _truncate_string(body, oversize):
 
     return body
 
-def _concat_path(app_id=settings.APN_DEFAULT_APP_ID, key=False, development=False):    
+
+def _concat_path(
+        app_id=settings.APN_DEFAULT_APP_ID,
+        key=False,
+        development=False):
     if key:
         file_suffix = settings.APN_KEY_FILE_SUFFIX
     else:
@@ -84,11 +99,16 @@ def _concat_path(app_id=settings.APN_DEFAULT_APP_ID, key=False, development=Fals
         path_prefix = settings.APN_PATH_PREFIX
 
     path = settings.APN_CERTIFICATE_PATH_TEMPLATE.format(
-            path_prefix=path_prefix,app_id=app_id, file_suffix=file_suffix)
-    
+        path_prefix=path_prefix, app_id=app_id, file_suffix=file_suffix)
+
     return path
 
-def _notify_idevices(msg, devices, app_id=settings.APN_DEFAULT_APP_ID, development=False):
+
+def _notify_idevices(
+        msg,
+        devices,
+        app_id=settings.APN_DEFAULT_APP_ID,
+        development=False):
     if getattr(settings, 'APN_PASSPHRASE') is None:
         raise ImproperlyConfigured(
             'Expect "%s" in your settings file.' % ('APN_PASSPHRASE'))

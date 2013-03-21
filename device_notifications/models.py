@@ -1,7 +1,8 @@
 from django.db import models
-from django.contrib.auth.models import User
 
 from django.utils import timezone
+
+from django.conf import settings
 
 from .managers import DeviceManager
 
@@ -17,7 +18,11 @@ class InvalidDeviceTypeException(Exception):
     pass
 
 
-class DeviceBase(models.Model):
+class AbstractBaseDevice(models.Model):
+    """
+    This model may be used as a mixin, or the the child "Device" model
+    may be used as-is.
+    """
     objects = DeviceManager()
 
     DEVICE_TYPE_IOS = 'ios'
@@ -31,7 +36,8 @@ class DeviceBase(models.Model):
         max_length=10,
         choices=DEVICE_TYPE_CHOICES)
 
-    user = models.ForeignKey(User)
+    development = models.BooleanField(default=False, null=False)
+
     added_at = models.DateTimeField(default=timezone.now)
     modified_at = models.DateTimeField(auto_now=True)
 
@@ -39,6 +45,15 @@ class DeviceBase(models.Model):
         default=True)
     invalidated = models.BooleanField(
         default=False)
+
+    app_id = models.CharField(max_length=16, default=None, null=True)
+    device_id = models.CharField(
+        max_length=64,
+        blank=False,
+        unique=True)
+    registration_id = models.TextField(
+        blank=True,
+        unique=True)
 
     class Meta:
         abstract = True
@@ -51,20 +66,9 @@ class DeviceBase(models.Model):
         else:
             raise InvalidDeviceTypeException()
 
-class AndroidDevice(DeviceBase):
-    device_id = models.CharField(
-        max_length=64,
-        blank=False,
-        unique=True)
 
-    registration_id = models.TextField(
+class Device(AbstractBaseDevice):
+    user = models.ForeignKey(
+        getattr(settings, 'AUTH_USER_MODEL', 'auth.User'),
         blank=True,
-        unique=True)
-
-class IDevice(DeviceBase):
-    development = models.BooleanField(default=False, null=False)
-
-    app_id = models.CharField(max_length=16, default=None, null=True)
-
-    token = models.CharField(max_length=64, default='', null=False,
-                             blank=False, unique=True)
+        null=True)

@@ -14,15 +14,18 @@ APN_DEVELOPMENT_HOST = 'gateway.sandbox.push.apple.com'
 # Exception at runtime.
 APN_PASSPHRASE = getattr(settings, 'APN_PASSPHRASE', None)
 
-# The default `app-id`. If you only have one app per server, any value will do. 
-# With multiple app, the key will be used to locate the correct certificate.
+# The default `app-id`.
+# If you only have one app per server, any value will do.
+# With multiple apps, the key will be used to locate the correct certificate.
 APN_DEFAULT_APP_ID = getattr(settings, 'APN_DEFAULT_APP_ID', 'app')
 
-# The default Key PEM file for production is `certs/ios/production/app-key.pem
-# The default Cert PEM file for production is `certs/ios/production/app-cert.pem
+# The default Key PEM file for production is:
+#   `certs/ios/production/app-key.pem
+# The default Cert PEM file for production is:
+#   `certs/ios/production/app-cert.pem
 APN_CERTIFICATE_PATH_TEMPLATE = getattr(
-        settings, 
-        'APN_CERTIFICATE_PATH_TEMPLATE', 
+        settings,
+        'APN_CERTIFICATE_PATH_TEMPLATE',
         'certs/ios/{path_prefix}/{app_id}{file_suffix}')
 
 APN_PATH_PREFIX = getattr(
@@ -37,14 +40,16 @@ APN_KEY_FILE_SUFFIX = getattr(
 APN_CERT_FILE_SUFFIX = getattr(
         settings, 'APN_CERT_FILE_SUFFIX', '-cert.pem')
 
+# TODO: make this generalized / editable
 IDEVICE_NOTIFICATION_TEMPLATE = {
     'aps': {
         'alert': {
                 'action-loc-key': 'Open',
-                'body': 'You have received a message' # TODO: make this generalized / editable
-            }, 'badge': 1
-        }
+                'body': 'You have received a message'
+        },
+        'badge': 1
     }
+}
 
 # By default, do not use celery.
 # If you would like to use celery, mark this as True.

@@ -4,7 +4,7 @@ from django.utils import timezone
 from .tasks import gcm_send_message_task
 
 
-class InvalidDeviceTypeException(ValueError):
+class InvalidDeviceType(ValueError):
     """
     Exception raised when a device_type other
     than those supported is specified.
@@ -50,5 +50,5 @@ class AbstractBaseDevice(models.Model):
             return gcm_send_message_task(self.pk, message)
 
         else:
-            raise InvalidDeviceTypeException(
+            raise InvalidDeviceType(
                 '{} is not supported.'.format(self.get_device_type_display()))

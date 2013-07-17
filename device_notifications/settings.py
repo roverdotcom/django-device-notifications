@@ -24,38 +24,31 @@ APN_DEFAULT_APP_ID = getattr(settings, 'APN_DEFAULT_APP_ID', 'app')
 # The default Cert PEM file for production is:
 #   `certs/ios/production/app-cert.pem
 APN_CERTIFICATE_PATH_TEMPLATE = getattr(
-        settings,
-        'APN_CERTIFICATE_PATH_TEMPLATE',
-        'certs/ios/{path_prefix}/{app_id}{file_suffix}')
+    settings,
+    'APN_CERTIFICATE_PATH_TEMPLATE',
+    'certs/ios/{path_prefix}/{app_id}{file_suffix}')
 
 APN_PATH_PREFIX = getattr(
-        settings, 'APN_PATH_PREFIX', 'production')
+    settings, 'APN_PATH_PREFIX', 'production')
 
 APN_DEVELOPMENT_PATH_PREFIX = getattr(
-        settings, 'APN_DEVELOPMENT_PATH_PREFIX', 'development')
+    settings, 'APN_DEVELOPMENT_PATH_PREFIX', 'development')
 
 APN_KEY_FILE_SUFFIX = getattr(
-        settings, 'APN_KEY_FILE_SUFFIX', '-key.pem')
+    settings, 'APN_KEY_FILE_SUFFIX', '-key.pem')
 
 APN_CERT_FILE_SUFFIX = getattr(
-        settings, 'APN_CERT_FILE_SUFFIX', '-cert.pem')
+    settings, 'APN_CERT_FILE_SUFFIX', '-cert.pem')
 
 # TODO: make this generalized / editable
 IDEVICE_NOTIFICATION_TEMPLATE = {
     'aps': {
         'alert': {
-                'action-loc-key': 'Open',
-                'body': 'You have received a message'
+            'action-loc-key': 'Open',
+            'body': 'You have received a message'
         },
         'badge': 1
     }
 }
 
-# By default, do not use celery.
-# If you would like to use celery, mark this as True.
-# To learn more about celery, visit this documentation here:
-# http://docs.celeryproject.org/en/latest/index.html
-DEVICE_NOTIFICATIONS_USE_CELERY = getattr(
-    settings,
-    'DEVICE_NOTIFICATIONS_USE_CELERY',
-    False)
+DEVICE_MODEL = getattr(settings, 'DEVICE_MODEL', None)

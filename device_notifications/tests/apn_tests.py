@@ -16,7 +16,7 @@ from unittest import skip
 
 
 @skip('Skip APN tests.')
-class SendMessageTest(TestCase):
+class APNSendMessageTests(TestCase):
     SAMPLE_DEVICE_TOKEN = (
         '740faaaaaaaaf74f9b7c25d48e3358945f6aa01da5ddb387462c7eaf61bb78ad')
 
@@ -36,7 +36,7 @@ class SendMessageTest(TestCase):
         '227d7d7d')
 
     def setUp(self):
-        super(SendMessageTest, self).setUp()
+        super(APNSendMessageTest, self).setUp()
 
     def test_model(self):
         """

@@ -35,7 +35,7 @@ def gcm_send_message(device, message, retry):
 
         gcm_send_message_task.apply_async(
             args=[
-                device.device_id,
+                device.pk,
                 message,
                 retry
             ],

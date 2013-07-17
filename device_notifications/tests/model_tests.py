@@ -16,12 +16,12 @@ class AbstractBaseDeviceTests(TestCase):
         device = ConcreteTestDevice(
             pk=1,
             device_type='android')
-
         message = 'Hello World'
 
         device.send_message(message)
 
-        gcm_send_message_task.assert_called_once_with(device.pk, message)
+        gcm_send_message_task.apply_async.assert_called_with(
+            args=[device.pk, message])
 
     @patch('device_notifications.models.gcm_send_message_task')
     def test_send_message_bad_device_type(self, gcm_send_message_task):

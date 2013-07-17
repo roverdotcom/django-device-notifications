@@ -52,3 +52,5 @@ IDEVICE_NOTIFICATION_TEMPLATE = {
 }
 
 DEVICE_MODEL = getattr(settings, 'DEVICE_MODEL', None)
+
+GCM_API_KEY = getattr(settings, 'GCM_API_KEY', None)

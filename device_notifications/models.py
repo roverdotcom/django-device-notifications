@@ -43,11 +43,10 @@ class AbstractBaseDevice(models.Model):
 
     class Meta:
         abstract = True
-        unique_together = ('device_type', 'device_id')
 
     def send_message(self, message):
         if self.device_type == self.DEVICE_TYPE_ANDROID:
-            return gcm_send_message_task(self.pk, message)
+            return gcm_send_message_task.apply_async(args=[self.pk, message])
 
         else:
             raise InvalidDeviceType(

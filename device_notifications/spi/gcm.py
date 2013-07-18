@@ -4,8 +4,20 @@ from gcmclient import JSONMessage
 from device_notifications.settings import GCM_API_KEY
 
 
-def gcm_send_message(device, message, retry):
+def gcm_send_message(device, message, retry, logger):
     gcm = GCM(GCM_API_KEY)
+
+    logdata = {
+        'device_id': device.device_id,
+        'message': message,
+        'retry': retry,
+    }
+
+    logger.debug(
+        ('Sending message "%(message)s" to device '
+         '"%(device_id)s". This is try %(retry)d.'),
+        logdata,
+        extra=logdata)
 
     gcm_message = JSONMessage([device.device_id], message)
 
@@ -13,16 +25,41 @@ def gcm_send_message(device, message, retry):
 
     if result.canonical:
         # updated registration id
-        device.device_id = result.canonical()[device.device_id]
+        new_device_id = result.canonical()[device.device_id]
+
+        logdata['device_id_new'] = new_device_id
+        logger.info(
+            'Updating device from "%(device_id)s" to "%(device_id_new)s".',
+            logdata,
+            extra=logdata)
+
+        device.device_id = new_device_id
         device.save()
 
     elif result.not_registered:
         # the user uninstalled the app
+
+        logger.warning(
+            ('Invalidating device "%(device_id)s" '
+             'because it is not registered with Google.'),
+            logdata,
+            extra=logdata)
+
         device.invalidated = True
         device.save()
 
     elif result.failed:
         # unrecoverably failed
+        error_code = result.failed[device.device_id]
+
+        logdata['error_code'] = error_code
+
+        logger.warning(
+            ('Sending message "%(message)s" to device "%(device_id)s" '
+             'failed with error code "%(error_code)s".'),
+            logdata,
+            extra=logdata)
+
         device.invalidated = True
         device.save()
 
@@ -32,6 +69,17 @@ def gcm_send_message(device, message, retry):
         from device_notifications.tasks import gcm_send_message_task
 
         retry += 1
+        delay = result.delay(retry)
+
+        logdata['retry'] = retry
+        logdata['delay'] = delay
+
+        logger.info(
+            ('Retrying sending of message "%(message)s" '
+             'to device "%(device_id)s" for the "%(retry)d" time, '
+             'waiting "%(delay)f" seconds.'),
+            logdata,
+            extra=logdata)
 
         gcm_send_message_task.apply_async(
             args=[
@@ -39,4 +87,4 @@ def gcm_send_message(device, message, retry):
                 message,
                 retry
             ],
-            countdown=result.delay(retry))
+            countdown=delay)

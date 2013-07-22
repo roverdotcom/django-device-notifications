@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.db import get_model
+from django.db.models import get_model
 
 # Default Apple Push Notifications port is 2195.
 APN_PORT = getattr(settings, 'APN_PORT', 2195)
@@ -52,6 +52,6 @@ IDEVICE_NOTIFICATION_TEMPLATE = {
     }
 }
 
-DEVICE_MODEL = get_model(*getattr(settings, 'DEVICE_MODEL'))
+DEVICE_MODEL = get_model(*getattr(settings, 'DEVICE_MODEL', ('', '')))
 
 GCM_API_KEY = getattr(settings, 'GCM_API_KEY', None)

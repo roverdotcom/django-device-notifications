@@ -1,6 +1,7 @@
 from mock import patch
 
 from django.test.testcases import TestCase
+from django.test.utils import override_settings
 
 from device_notifications.models import AbstractBaseDevice
 from device_notifications.models import InvalidDeviceType
@@ -10,6 +11,7 @@ class ConcreteTestDevice(AbstractBaseDevice):
     pass
 
 
+@override_settings(DEVICE_MODEL=ConcreteTestDevice)
 class AbstractBaseDeviceTests(TestCase):
     @patch('device_notifications.models.gcm_send_message_task')
     def test_send_message(self, gcm_send_message_task):

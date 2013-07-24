@@ -55,3 +55,5 @@ IDEVICE_NOTIFICATION_TEMPLATE = {
 DEVICE_MODEL = get_model(*getattr(settings, 'DEVICE_MODEL', ('', '')))
 
 GCM_API_KEY = getattr(settings, 'GCM_API_KEY', None)
+
+GCM_MAX_TRIES = getattr(settings, 'GCM_MAX_TRIES', 10)

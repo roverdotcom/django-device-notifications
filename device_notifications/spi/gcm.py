@@ -55,7 +55,7 @@ def gcm_send_message(device, message, retry, logger):
 
         logdata['error_code'] = error_code
 
-        logger.warning(
+        logger.error(
             ('Sending message "%(message)s" to device "%(device_id)s" '
              'failed with error code "%(error_code)s".'),
             logdata,
@@ -77,7 +77,7 @@ def gcm_send_message(device, message, retry, logger):
         logdata['threshold'] = GCM_MAX_TRIES
 
         if retry > GCM_MAX_TRIES:
-            logger.warning(
+            logger.error(
                 ('Stopping trying to delive message "%(message)s"'
                  ' to device "%(device_id)s" because we reached the'
                  ' maximum try threshold of "%(threshold)d".'),

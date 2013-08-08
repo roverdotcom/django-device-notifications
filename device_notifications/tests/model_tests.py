@@ -12,8 +12,19 @@ class ConcreteTestDevice(AbstractBaseDevice):
     pass
 
 
-@patch.object(settings, 'get_device_model', return_value=ConcreteTestDevice)
 class AbstractBaseDeviceTests(TestCase):
+    def setUp(self):
+        self.get_device_model_patcher = patch.object(
+            settings,
+            'get_device_model',
+            return_value=ConcreteTestDevice)
+        self.get_device_model_patcher.start()
+        super(AbstractBaseDeviceTests, self).setUp()
+
+    def tearDown(self):
+        super(AbstractBaseDeviceTests, self).tearDown()
+        self.get_device_model_patcher.stop()
+
     @patch('device_notifications.models.gcm_send_message_task')
     def test_send_message(self, gcm_send_message_task):
         device = ConcreteTestDevice(

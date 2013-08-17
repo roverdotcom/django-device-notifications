@@ -1,30 +1,12 @@
 from mock import patch
 
-from django.test.testcases import TestCase
+from device_notifications.tests.utils import DeviceNotificationTestCase
+from device_notifications.tests.utils import ConcreteTestDevice
 
-from device_notifications import settings
-
-from device_notifications.models import AbstractBaseDevice
 from device_notifications.models import InvalidDeviceType
 
 
-class ConcreteTestDevice(AbstractBaseDevice):
-    pass
-
-
-class AbstractBaseDeviceSendMessageTests(TestCase):
-    def setUp(self):
-        self.get_device_model_patcher = patch.object(
-            settings,
-            'get_device_model',
-            return_value=ConcreteTestDevice)
-        self.get_device_model_patcher.start()
-        super(AbstractBaseDeviceSendMessageTests, self).setUp()
-
-    def tearDown(self):
-        super(AbstractBaseDeviceSendMessageTests, self).tearDown()
-        self.get_device_model_patcher.stop()
-
+class AbstractBaseDeviceSendMessageTests(DeviceNotificationTestCase):
     @patch('device_notifications.models.gcm_send_message_task')
     def test_send_message(self, gcm_send_message_task):
         device = ConcreteTestDevice(

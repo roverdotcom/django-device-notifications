@@ -45,6 +45,9 @@ class AbstractBaseDevice(models.Model):
         abstract = True
 
     def send_message(self, message):
+        if self.invalidated or not self.is_active:
+            return
+
         if self.device_type == self.DEVICE_TYPE_ANDROID:
             return gcm_send_message_task.apply_async(args=[self.pk, message])
 

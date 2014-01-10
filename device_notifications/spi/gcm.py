@@ -20,7 +20,9 @@ def gcm_send_message(device, message, retry, logger):
         logdata,
         extra=logdata)
 
-    gcm_message = JSONMessage([device.device_id], message)
+    data = {'message': message}
+
+    gcm_message = JSONMessage([device.device_id], data)
 
     result = gcm.send(gcm_message)
 

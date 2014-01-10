@@ -10,12 +10,12 @@ def gcm_send_message(device, message, retry, logger):
 
     logdata = {
         'device_id': device.device_id,
-        'message': message,
+        'msg_str': message,
         'retry': retry,
     }
 
     logger.debug(
-        ('Sending message "%(message)s" to device '
+        ('Sending message "%(msg_str)s" to device '
          '"%(device_id)s". This is try %(retry)d.'),
         logdata,
         extra=logdata)
@@ -58,7 +58,7 @@ def gcm_send_message(device, message, retry, logger):
         logdata['error_code'] = error_code
 
         logger.error(
-            ('Sending message "%(message)s" to device "%(device_id)s" '
+            ('Sending message "%(msg_str)s" to device "%(device_id)s" '
              'failed with error code "%(error_code)s".'),
             logdata,
             extra=logdata)
@@ -80,7 +80,7 @@ def gcm_send_message(device, message, retry, logger):
 
         if retry > GCM_MAX_TRIES:
             logger.error(
-                ('Stopping trying to delive message "%(message)s"'
+                ('Stopping trying to delive message "%(msg_str)s"'
                  ' to device "%(device_id)s" because we reached the'
                  ' maximum try threshold of "%(threshold)d".'),
                 logdata,
@@ -88,7 +88,7 @@ def gcm_send_message(device, message, retry, logger):
             return None
 
         logger.info(
-            ('Retrying sending of message "%(message)s" '
+            ('Retrying sending of message "%(msg_str)s" '
              'to device "%(device_id)s" for the "%(retry)d" time, '
              'waiting "%(delay)f" seconds.'),
             logdata,

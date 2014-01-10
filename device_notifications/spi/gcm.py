@@ -26,7 +26,7 @@ def gcm_send_message(device, message, retry, logger):
 
     if result.canonical:
         # updated registration id
-        new_device_id = result.canonical()[device.device_id]
+        new_device_id = result.canonical[device.device_id]
 
         logdata['device_id_new'] = new_device_id
         logger.info(
